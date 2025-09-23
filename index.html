@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟอร์มข้อมูล IP เครื่องสาขา</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+        .file-upload-area {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">📊 ระบบจัดเก็บข้อมูล IP เครื่องสาขา</h1>
+            <p class="text-gray-600">กรุณากรอกข้อมูล IP เครื่องคอมพิวเตอร์ของสาขาให้ครบถ้วนและถูกต้อง</p>
+        </div>
+
+        <!-- Example Image Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="mr-2">📋</span> ตัวอย่างรูป IP Address ที่ต้องการ
+            </h2>
+            <div class="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+                <div class="text-center">
+                    <div id="exampleImageContainer">
+                        <!-- ⭐ ใส่ URL รูปตัวอย่าง IP Address ตรงนี้ ในช่อง src="" -->
+                        <!-- ตัวอย่าง: src="https://example.com/ip-example.jpg" -->
+                        <img id="exampleImage" class="mx-auto max-w-full max-h-64 rounded-lg shadow-md mb-4" 
+                             src="https://lh3.googleusercontent.com/d/1MdYAe4NB6mzN9k8SWYVf5tHA6caP0603" alt="รูปตัวอย่าง IP Address"
+                             onerror="this.style.display='none'; document.getElementById('imageError').style.display='block';">
+                        <div id="imageError" class="hidden text-red-500 text-sm mb-4">
+                            ไม่สามารถโหลดรูปได้ กรุณาตรวจสอบ URL
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600">
+                        <strong>คำแนะนำ:</strong> รูปตัวอย่างที่แสดง IP Address จากคำสั่ง ipconfig หรือ Network Settings
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+            <form id="branchForm" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- รหัสสาขา -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            🏢 รหัสสาขา <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="branchCode" required maxlength="2" pattern="[A-Za-zก-ฮ0-9]{2}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                               placeholder="เช่น A1, B2, ก1">
+                        <p class="text-xs text-gray-500 mt-1">2 ตัวอักษร: A-Z, ก-ฮ, 0-9</p>
+                    </div>
+
+                    <!-- ชื่อสาขา -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            🏪 ชื่อสาขา <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex">
+                            <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-lg">
+                                สาขา
+                            </span>
+                            <input type="text" id="branchName" required
+                                   class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                   placeholder="เช่น สีลม, บางนา, เซ็นทรัล">
+                        </div>
+                    </div>
+
+                    <!-- เขต -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            📍 เขต <span class="text-red-500">*</span>
+                        </label>
+                        <select id="district" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <option value="">เลือกเขต</option>
+                            <option value="K012">K012</option>
+                            <option value="K122">K122</option>
+                            <option value="K189">K189</option>
+                            <option value="K195">K195</option>
+                            <option value="K196">K196</option>
+                            <option value="K247">K247</option>
+                            <option value="K273">K273</option>
+                            <option value="K358">K358</option>
+                        </select>
+                    </div>
+
+                    <!-- IP Address -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            💻 IP Address (คอมพิวเตอร์) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="ipAddress" required pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                               placeholder="เช่น 192.168.1.100">
+                        <p class="text-xs text-gray-500 mt-1">รูปแบบ: xxx.xxx.xxx.xxx</p>
+                    </div>
+                </div>
+
+                <!-- รูป IP เครื่อง -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        📸 รูป IP เครื่อง <span class="text-red-500">*</span>
+                    </label>
+                    <div class="file-upload-area rounded-lg p-6 text-center cursor-pointer" id="uploadArea">
+                        <input type="file" id="imageFile" accept="image/*" class="hidden" required>
+                        <div id="uploadContent">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <p class="text-gray-600 mb-2">คลิกเพื่อเลือกรูป หรือลากไฟล์มาวางที่นี่</p>
+                            <p class="text-xs text-gray-500">รองรับไฟล์: JPG, PNG, GIF (ขนาดไม่เกิน 5MB)</p>
+                        </div>
+                        <div id="imagePreview" class="hidden">
+                            <img id="previewImg" class="mx-auto max-w-xs max-h-48 rounded-lg shadow-md mb-2">
+                            <p id="fileName" class="text-sm text-gray-600 mb-2"></p>
+                            <button type="button" id="removeImage" class="text-red-500 hover:text-red-700 text-sm">
+                                🗑️ ลบรูป
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-center pt-4">
+                    <button type="submit" 
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200">
+                        💾 บันทึกข้อมูล
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white rounded-2xl shadow-xl mb-6">
+            <div class="flex border-b">
+                <button id="dashboardTab" class="flex-1 py-4 px-6 text-center font-semibold text-blue-600 border-b-2 border-blue-600 bg-blue-50">
+                    📊 แดชบอร์ด
+                </button>
+                <button id="dataTab" class="flex-1 py-4 px-6 text-center font-semibold text-gray-600 hover:text-blue-600 hover:bg-gray-50">
+                    📋 ข้อมูลที่บันทึกแล้ว
+                </button>
+                <button id="logTab" class="flex-1 py-4 px-6 text-center font-semibold text-gray-600 hover:text-blue-600 hover:bg-gray-50">
+                    📝 Log การแก้ไข
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="space-y-6">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">สาขาทั้งหมด</p>
+                            <p id="totalBranches" class="text-3xl font-bold">0</p>
+                        </div>
+                        <div class="bg-blue-400 bg-opacity-30 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">เขตทั้งหมด</p>
+                            <p id="totalDistricts" class="text-3xl font-bold">0</p>
+                        </div>
+                        <div class="bg-green-400 bg-opacity-30 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100 text-sm font-medium">IP Address</p>
+                            <p id="totalIPs" class="text-3xl font-bold">0</p>
+                        </div>
+                        <div class="bg-purple-400 bg-opacity-30 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-6 text-white shadow-xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-orange-100 text-sm font-medium">รูปภาพ</p>
+                            <p id="totalImages" class="text-3xl font-bold">0</p>
+                        </div>
+                        <div class="bg-orange-400 bg-opacity-30 rounded-full p-3">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- District Summary -->
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">📍 สรุปข้อมูลรายเขต</h2>
+                    <button id="downloadDistrictBtn" 
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transform hover:scale-105 transition-all duration-200">
+                        📥 Download สรุปเขต
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">เขต</th>
+                                <th class="border border-gray-200 px-4 py-3 text-center font-semibold text-gray-700">จำนวนสาขา</th>
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">รายชื่อสาขา</th>
+                                <th class="border border-gray-200 px-4 py-3 text-center font-semibold text-gray-700">เปอร์เซ็นต์</th>
+                            </tr>
+                        </thead>
+                        <tbody id="districtSummaryTable">
+                            <!-- District summary will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="noDistrictData" class="text-center py-8 text-gray-500">
+                    ยังไม่มีข้อมูลสาขา
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- District Chart -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📊 กราฟแสดงจำนวนสาขาต่อเขต</h3>
+                    <div id="districtChart" class="h-64 flex items-center justify-center">
+                        <canvas id="districtCanvas" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">🕒 กิจกรรมล่าสุด</h3>
+                    <div id="recentActivity" class="space-y-3 max-h-64 overflow-y-auto">
+                        <!-- Recent activities will be inserted here -->
+                    </div>
+                    <div id="noRecentActivity" class="text-center py-8 text-gray-500">
+                        ยังไม่มีกิจกรรม
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div id="dataSection" class="bg-white rounded-2xl shadow-xl p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-800">📋 ข้อมูลที่บันทึกแล้ว</h2>
+                <button id="downloadBtn" 
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transform hover:scale-105 transition-all duration-200">
+                    📥 Download Excel
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">รหัสสาขา</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">ชื่อสาขา</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">เขต</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">IP Address</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">รูป IP</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">วันที่บันทึก</th>
+                            <th class="border border-gray-200 px-4 py-3 text-center font-semibold text-gray-700">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable">
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="noData" class="text-center py-8 text-gray-500">
+                ยังไม่มีข้อมูลที่บันทึก
+            </div>
+        </div>
+
+        <!-- Log Section -->
+        <div id="logSection" class="bg-white rounded-2xl shadow-xl p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-800">📝 Log การแก้ไข</h2>
+                <button id="downloadLogBtn" 
+                        class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transform hover:scale-105 transition-all duration-200">
+                    📥 Download Log Excel
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">วันที่/เวลา</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">ผู้ใช้</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">การกระทำ</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">รหัสสาขา</th>
+                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">รายละเอียด</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTable">
+                        <!-- Log data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="noLog" class="text-center py-8 text-gray-500">
+                ยังไม่มี Log การแก้ไข
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">✏️ แก้ไขข้อมูลสาขา</h3>
+                <button id="closeEditModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            
+            <form id="editForm" class="space-y-6">
+                <input type="hidden" id="editIndex">
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- รหัสสาขา -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            🏢 รหัสสาขา <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="editBranchCode" required maxlength="2" pattern="[A-Za-zก-ฮ0-9]{2}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <p class="text-xs text-gray-500 mt-1">2 ตัวอักษร: A-Z, ก-ฮ, 0-9</p>
+                    </div>
+
+                    <!-- ชื่อสาขา -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            🏪 ชื่อสาขา <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex">
+                            <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-lg">
+                                สาขา
+                            </span>
+                            <input type="text" id="editBranchName" required
+                                   class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        </div>
+                    </div>
+
+                    <!-- เขต -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            📍 เขต <span class="text-red-500">*</span>
+                        </label>
+                        <select id="editDistrict" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <option value="">เลือกเขต</option>
+                            <option value="K012">K012</option>
+                            <option value="K122">K122</option>
+                            <option value="K189">K189</option>
+                            <option value="K195">K195</option>
+                            <option value="K196">K196</option>
+                            <option value="K247">K247</option>
+                            <option value="K273">K273</option>
+                            <option value="K358">K358</option>
+                        </select>
+                    </div>
+
+                    <!-- IP Address -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            💻 IP Address (คอมพิวเตอร์) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="editIpAddress" required pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <p class="text-xs text-gray-500 mt-1">รูปแบบ: xxx.xxx.xxx.xxx</p>
+                    </div>
+                </div>
+
+                <!-- รูป IP เครื่อง -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        📸 รูป IP เครื่อง
+                    </label>
+                    <div class="mb-4">
+                        <img id="currentImage" class="max-w-xs max-h-48 rounded-lg shadow-md">
+                        <p class="text-sm text-gray-600 mt-2">รูปปัจจุบัน</p>
+                    </div>
+                    <div class="file-upload-area rounded-lg p-6 text-center cursor-pointer" id="editUploadArea">
+                        <input type="file" id="editImageFile" accept="image/*" class="hidden">
+                        <div id="editUploadContent">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <p class="text-gray-600 mb-2">คลิกเพื่อเลือกรูปใหม่ (ถ้าต้องการเปลี่ยน)</p>
+                            <p class="text-xs text-gray-500">รองรับไฟล์: JPG, PNG, GIF (ขนาดไม่เกิน 5MB)</p>
+                        </div>
+                        <div id="editImagePreview" class="hidden">
+                            <img id="editPreviewImg" class="mx-auto max-w-xs max-h-48 rounded-lg shadow-md mb-2">
+                            <p id="editFileName" class="text-sm text-gray-600 mb-2"></p>
+                            <button type="button" id="removeEditImage" class="text-red-500 hover:text-red-700 text-sm">
+                                🗑️ ลบรูป
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-center gap-4 pt-4">
+                    <button type="button" id="cancelEdit" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200">
+                        ยกเลิก
+                    </button>
+                    <button type="submit" 
+                            class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200">
+                        💾 บันทึกการแก้ไข
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Load saved data from localStorage
+        let savedData = JSON.parse(localStorage.getItem('branchData')) || [];
+        let logData = JSON.parse(localStorage.getItem('logData')) || [];
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('imageFile');
+        const uploadContent = document.getElementById('uploadContent');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const fileName = document.getElementById('fileName');
+        const removeImageBtn = document.getElementById('removeImage');
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            if (!imagePreview.classList.contains('hidden')) return;
+            fileInput.click();
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Handle file upload
+        function handleFile(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+                return;
+            }
+
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('ขนาดไฟล์ต้องไม่เกิน 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                fileName.textContent = file.name;
+                uploadContent.classList.add('hidden');
+                imagePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove image
+        removeImageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.value = '';
+            uploadContent.classList.remove('hidden');
+            imagePreview.classList.add('hidden');
+        });
+
+        // Display data in table
+        function displayData() {
+            const tableBody = document.getElementById('dataTable');
+            const noDataDiv = document.getElementById('noData');
+            
+            if (savedData.length === 0) {
+                tableBody.innerHTML = '';
+                noDataDiv.style.display = 'block';
+                return;
+            }
+            
+            noDataDiv.style.display = 'none';
+            tableBody.innerHTML = savedData.map((item, index) => `
+                <tr class="hover:bg-gray-50">
+                    <td class="border border-gray-200 px-4 py-3">${item.branchCode}</td>
+                    <td class="border border-gray-200 px-4 py-3">${item.branchName}</td>
+                    <td class="border border-gray-200 px-4 py-3">${item.district}</td>
+                    <td class="border border-gray-200 px-4 py-3 font-mono">${item.ipAddress}</td>
+                    <td class="border border-gray-200 px-4 py-3">
+                        <button onclick="viewImage('${item.imageData}')" 
+                                class="text-blue-600 hover:text-blue-800 underline">ดูรูป</button>
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3">${item.timestamp}</td>
+                    <td class="border border-gray-200 px-4 py-3 text-center">
+                        <button onclick="editData(${index})" 
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm mr-2">
+                            ✏️ แก้ไข
+                        </button>
+                        <button onclick="deleteData(${index})" 
+                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                            🗑️ ลบ
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Display log data
+        function displayLogData() {
+            const logTableBody = document.getElementById('logTable');
+            const noLogDiv = document.getElementById('noLog');
+            
+            if (logData.length === 0) {
+                logTableBody.innerHTML = '';
+                noLogDiv.style.display = 'block';
+                return;
+            }
+            
+            noLogDiv.style.display = 'none';
+            logTableBody.innerHTML = logData.map(log => `
+                <tr class="hover:bg-gray-50">
+                    <td class="border border-gray-200 px-4 py-3">${log.timestamp}</td>
+                    <td class="border border-gray-200 px-4 py-3">${log.user}</td>
+                    <td class="border border-gray-200 px-4 py-3">
+                        <span class="px-2 py-1 rounded text-xs font-semibold ${log.action === 'เพิ่ม' ? 'bg-green-100 text-green-800' : log.action === 'แก้ไข' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                            ${log.action}
+                        </span>
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3">${log.branchCode}</td>
+                    <td class="border border-gray-200 px-4 py-3 text-sm">${log.details}</td>
+                </tr>
+            `).reverse().join('');
+        }
+
+        // Add log entry
+        function addLog(action, branchCode, branchName, details) {
+            const user = `${branchCode}-${branchName.replace('สาขา', '')}`;
+            const logEntry = {
+                timestamp: new Date().toLocaleString('th-TH'),
+                user: user,
+                action: action,
+                branchCode: branchCode,
+                details: details
+            };
+            
+            logData.push(logEntry);
+            localStorage.setItem('logData', JSON.stringify(logData));
+        }
+
+        // View image function
+        function viewImage(imageData) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-4 max-w-2xl max-h-[90vh] overflow-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">รูป IP Address</h3>
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+                    </div>
+                    <img src="${imageData}" class="max-w-full h-auto rounded-lg">
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Form submission
+        document.getElementById('branchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!fileInput.files[0]) {
+                alert('กรุณาเลือกรูป IP Address');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const formData = {
+                    branchCode: document.getElementById('branchCode').value,
+                    branchName: 'สาขา' + document.getElementById('branchName').value,
+                    district: document.getElementById('district').value,
+                    ipAddress: document.getElementById('ipAddress').value,
+                    imageData: e.target.result,
+                    imageName: fileInput.files[0].name,
+                    timestamp: new Date().toLocaleString('th-TH')
+                };
+                
+                // Validate branch code format
+                const branchCodePattern = /^[A-Za-zก-ฮ0-9]{2}$/;
+                if (!branchCodePattern.test(formData.branchCode)) {
+                    alert('กรุณากรอกรหัสสาขา 2 ตัวอักษร (A-Z, ก-ฮ, 0-9)');
+                    return;
+                }
+                
+                // Validate IP format
+                const ipPattern = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+                if (!ipPattern.test(formData.ipAddress)) {
+                    alert('กรุณากรอก IP Address ในรูปแบบที่ถูกต้อง (เช่น 192.168.1.100)');
+                    return;
+                }
+                
+                // Check for duplicate branch code
+                if (savedData.some(item => item.branchCode === formData.branchCode)) {
+                    alert('รหัสสาขานี้มีอยู่ในระบบแล้ว กรุณาใช้รหัสสาขาอื่น');
+                    return;
+                }
+                
+                // Save data
+                savedData.push(formData);
+                localStorage.setItem('branchData', JSON.stringify(savedData));
+                
+                // Add log entry
+                addLog('เพิ่ม', formData.branchCode, formData.branchName, `เพิ่มข้อมูลสาขาใหม่ IP: ${formData.ipAddress}, เขต: ${formData.district}`);
+                
+                // Reset form and refresh display
+                document.getElementById('branchForm').reset();
+                fileInput.value = '';
+                uploadContent.classList.remove('hidden');
+                imagePreview.classList.add('hidden');
+                displayData();
+                displayLogData();
+                updateDashboard();
+                
+                // Show success message
+                alert('✅ บันทึกข้อมูลเรียบร้อยแล้ว!');
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        });
+
+        // Download Excel function
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            if (savedData.length === 0) {
+                alert('ไม่มีข้อมูลให้ดาวน์โหลด');
+                return;
+            }
+            
+            // Request password for download
+            const password = prompt('🔐 กรุณาใส่รหัสผ่านเพื่อดาวน์โหลดไฟล์ Excel:');
+            
+            // Check password
+            if (password !== '348900Ty') {
+                if (password !== null) { // User didn't cancel
+                    alert('❌ รหัสผ่านไม่ถูกต้อง! ไม่สามารถดาวน์โหลดได้');
+                }
+                return;
+            }
+            
+            // Prepare data for Excel
+            const excelData = savedData.map(item => ({
+                'รหัสสาขา': item.branchCode,
+                'ชื่อสาขา': item.branchName,
+                'เขต': item.district,
+                'IP Address': item.ipAddress,
+                'ชื่อไฟล์รูป': item.imageName,
+                'วันที่บันทึก': item.timestamp
+            }));
+            
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { width: 15 }, // รหัสสาขา
+                { width: 25 }, // ชื่อสาขา
+                { width: 20 }, // เขต
+                { width: 18 }, // IP Address
+                { width: 25 }, // ชื่อไฟล์รูป
+                { width: 20 }  // วันที่บันทึก
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws, 'ข้อมูล IP สาขา');
+            
+            // Generate filename with current date
+            const now = new Date();
+            const filename = `ข้อมูล_IP_สาขา_${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.xlsx`;
+            
+            // Download file
+            XLSX.writeFile(wb, filename);
+            
+            // Show success message
+            alert('✅ ดาวน์โหลดไฟล์เรียบร้อยแล้ว!');
+        });
+
+
+
+        // Dashboard functions
+        function updateDashboard() {
+            // Update summary cards
+            document.getElementById('totalBranches').textContent = savedData.length;
+            
+            const uniqueDistricts = [...new Set(savedData.map(item => item.district))];
+            document.getElementById('totalDistricts').textContent = uniqueDistricts.length;
+            document.getElementById('totalIPs').textContent = savedData.length;
+            document.getElementById('totalImages').textContent = savedData.length;
+            
+            // Update district summary
+            displayDistrictSummary();
+            
+            // Update chart
+            drawDistrictChart();
+            
+            // Update recent activity
+            displayRecentActivity();
+        }
+
+        function displayDistrictSummary() {
+            const districtSummaryTable = document.getElementById('districtSummaryTable');
+            const noDistrictData = document.getElementById('noDistrictData');
+            
+            if (savedData.length === 0) {
+                districtSummaryTable.innerHTML = '';
+                noDistrictData.style.display = 'block';
+                return;
+            }
+            
+            noDistrictData.style.display = 'none';
+            
+            // Group data by district
+            const districtGroups = {};
+            savedData.forEach(item => {
+                if (!districtGroups[item.district]) {
+                    districtGroups[item.district] = [];
+                }
+                districtGroups[item.district].push(item);
+            });
+            
+            // Sort districts
+            const sortedDistricts = Object.keys(districtGroups).sort();
+            
+            districtSummaryTable.innerHTML = sortedDistricts.map(district => {
+                const branches = districtGroups[district];
+                const percentage = ((branches.length / savedData.length) * 100).toFixed(1);
+                const branchNames = branches.map(b => `${b.branchCode} (${b.branchName})`).join(', ');
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="border border-gray-200 px-4 py-3 font-semibold text-blue-600">${district}</td>
+                        <td class="border border-gray-200 px-4 py-3 text-center">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
+                                ${branches.length}
+                            </span>
+                        </td>
+                        <td class="border border-gray-200 px-4 py-3 text-sm">${branchNames}</td>
+                        <td class="border border-gray-200 px-4 py-3 text-center">
+                            <div class="flex items-center justify-center">
+                                <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: ${percentage}%"></div>
+                                </div>
+                                <span class="text-sm font-semibold">${percentage}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function drawDistrictChart() {
+            const canvas = document.getElementById('districtCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (savedData.length === 0) {
+                ctx.fillStyle = '#9CA3AF';
+                ctx.font = '16px Sarabun';
+                ctx.textAlign = 'center';
+                ctx.fillText('ยังไม่มีข้อมูล', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            // Group data by district
+            const districtGroups = {};
+            savedData.forEach(item => {
+                if (!districtGroups[item.district]) {
+                    districtGroups[item.district] = 0;
+                }
+                districtGroups[item.district]++;
+            });
+            
+            const districts = Object.keys(districtGroups).sort();
+            const counts = districts.map(d => districtGroups[d]);
+            const maxCount = Math.max(...counts);
+            
+            // Chart dimensions
+            const padding = 40;
+            const chartWidth = canvas.width - (padding * 2);
+            const chartHeight = canvas.height - (padding * 2);
+            const barWidth = chartWidth / districts.length;
+            
+            // Colors for bars
+            const colors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4', '#84CC16', '#F97316'];
+            
+            // Draw bars
+            districts.forEach((district, index) => {
+                const barHeight = (counts[index] / maxCount) * chartHeight;
+                const x = padding + (index * barWidth) + (barWidth * 0.1);
+                const y = canvas.height - padding - barHeight;
+                const width = barWidth * 0.8;
+                
+                // Draw bar
+                ctx.fillStyle = colors[index % colors.length];
+                ctx.fillRect(x, y, width, barHeight);
+                
+                // Draw district label
+                ctx.fillStyle = '#374151';
+                ctx.font = '12px Sarabun';
+                ctx.textAlign = 'center';
+                ctx.fillText(district, x + width/2, canvas.height - padding + 15);
+                
+                // Draw count label
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 14px Sarabun';
+                ctx.fillText(counts[index], x + width/2, y + barHeight/2 + 5);
+            });
+            
+            // Draw title
+            ctx.fillStyle = '#1F2937';
+            ctx.font = 'bold 14px Sarabun';
+            ctx.textAlign = 'center';
+            ctx.fillText('จำนวนสาขาในแต่ละเขต', canvas.width / 2, 20);
+        }
+
+        function displayRecentActivity() {
+            const recentActivity = document.getElementById('recentActivity');
+            const noRecentActivity = document.getElementById('noRecentActivity');
+            
+            if (logData.length === 0) {
+                recentActivity.innerHTML = '';
+                noRecentActivity.style.display = 'block';
+                return;
+            }
+            
+            noRecentActivity.style.display = 'none';
+            
+            // Show last 5 activities
+            const recentLogs = logData.slice(-5).reverse();
+            
+            recentActivity.innerHTML = recentLogs.map(log => {
+                const actionColor = log.action === 'เพิ่ม' ? 'text-green-600 bg-green-100' : 
+                                  log.action === 'แก้ไข' ? 'text-yellow-600 bg-yellow-100' : 
+                                  'text-red-600 bg-red-100';
+                
+                return `
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div class="flex-shrink-0">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${actionColor}">
+                                ${log.action}
+                            </span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900">${log.branchCode} - ${log.user}</p>
+                            <p class="text-xs text-gray-500 truncate">${log.details}</p>
+                            <p class="text-xs text-gray-400">${log.timestamp}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Download district summary
+        document.getElementById('downloadDistrictBtn').addEventListener('click', function() {
+            if (savedData.length === 0) {
+                alert('ไม่มีข้อมูลให้ดาวน์โหลด');
+                return;
+            }
+            
+            // Request password for download
+            const password = prompt('🔐 กรุณาใส่รหัสผ่านเพื่อดาวน์โหลดไฟล์สรุปเขต:');
+            
+            // Check password
+            if (password !== '348900Ty') {
+                if (password !== null) { // User didn't cancel
+                    alert('❌ รหัสผ่านไม่ถูกต้อง! ไม่สามารถดาวน์โหลดได้');
+                }
+                return;
+            }
+            
+            // Group data by district
+            const districtGroups = {};
+            savedData.forEach(item => {
+                if (!districtGroups[item.district]) {
+                    districtGroups[item.district] = [];
+                }
+                districtGroups[item.district].push(item);
+            });
+            
+            // Prepare summary data
+            const summaryData = Object.keys(districtGroups).sort().map(district => {
+                const branches = districtGroups[district];
+                const percentage = ((branches.length / savedData.length) * 100).toFixed(1);
+                const branchList = branches.map(b => `${b.branchCode} (${b.branchName})`).join(', ');
+                
+                return {
+                    'เขต': district,
+                    'จำนวนสาขา': branches.length,
+                    'เปอร์เซ็นต์': percentage + '%',
+                    'รายชื่อสาขา': branchList
+                };
+            });
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(summaryData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { width: 15 }, // เขต
+                { width: 15 }, // จำนวนสาขา
+                { width: 12 }, // เปอร์เซ็นต์
+                { width: 60 }  // รายชื่อสาขา
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws, 'สรุปรายเขต');
+            
+            // Generate filename
+            const now = new Date();
+            const filename = `สรุปข้อมูลรายเขต_${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.xlsx`;
+            
+            // Download file
+            XLSX.writeFile(wb, filename);
+            
+            alert('✅ ดาวน์โหลดไฟล์สรุปเขตเรียบร้อยแล้ว!');
+        });
+
+        // Tab switching
+        document.getElementById('dashboardTab').addEventListener('click', function() {
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('dataSection').classList.add('hidden');
+            document.getElementById('logSection').classList.add('hidden');
+            
+            // Update tab styles
+            this.classList.add('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            this.classList.remove('text-gray-600');
+            document.getElementById('dataTab').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            document.getElementById('dataTab').classList.add('text-gray-600');
+            document.getElementById('logTab').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            document.getElementById('logTab').classList.add('text-gray-600');
+            
+            updateDashboard();
+        });
+
+        document.getElementById('dataTab').addEventListener('click', function() {
+            document.getElementById('dataSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('logSection').classList.add('hidden');
+            
+            // Update tab styles
+            this.classList.add('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            this.classList.remove('text-gray-600');
+            document.getElementById('dashboardTab').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            document.getElementById('dashboardTab').classList.add('text-gray-600');
+            document.getElementById('logTab').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            document.getElementById('logTab').classList.add('text-gray-600');
+        });
+
+        document.getElementById('logTab').addEventListener('click', function() {
+            document.getElementById('logSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('dataSection').classList.add('hidden');
+            
+            // Update tab styles
+            this.classList.add('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            this.classList.remove('text-gray-600');
+            document.getElementById('dashboardTab').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            document.getElementById('dashboardTab').classList.add('text-gray-600');
+            document.getElementById('dataTab').classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'bg-blue-50');
+            document.getElementById('dataTab').classList.add('text-gray-600');
+            
+            displayLogData();
+        });
+
+        // Edit data function
+        function editData(index) {
+            const item = savedData[index];
+            
+            // Fill edit form
+            document.getElementById('editIndex').value = index;
+            document.getElementById('editBranchCode').value = item.branchCode;
+            document.getElementById('editBranchName').value = item.branchName.replace('สาขา', '');
+            document.getElementById('editDistrict').value = item.district;
+            document.getElementById('editIpAddress').value = item.ipAddress;
+            document.getElementById('currentImage').src = item.imageData;
+            
+            // Show modal
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        // Modal controls
+        document.getElementById('closeEditModal').addEventListener('click', function() {
+            document.getElementById('editModal').classList.add('hidden');
+        });
+
+        document.getElementById('cancelEdit').addEventListener('click', function() {
+            document.getElementById('editModal').classList.add('hidden');
+        });
+
+        // Edit form file upload handling
+        const editUploadArea = document.getElementById('editUploadArea');
+        const editFileInput = document.getElementById('editImageFile');
+        const editUploadContent = document.getElementById('editUploadContent');
+        const editImagePreview = document.getElementById('editImagePreview');
+        const editPreviewImg = document.getElementById('editPreviewImg');
+        const editFileName = document.getElementById('editFileName');
+        const removeEditImageBtn = document.getElementById('removeEditImage');
+
+        editUploadArea.addEventListener('click', () => {
+            if (!editImagePreview.classList.contains('hidden')) return;
+            editFileInput.click();
+        });
+
+        editFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleEditFile(e.target.files[0]);
+            }
+        });
+
+        function handleEditFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('ขนาดไฟล์ต้องไม่เกิน 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                editPreviewImg.src = e.target.result;
+                editFileName.textContent = file.name;
+                editUploadContent.classList.add('hidden');
+                editImagePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        removeEditImageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            editFileInput.value = '';
+            editUploadContent.classList.remove('hidden');
+            editImagePreview.classList.add('hidden');
+        });
+
+        // Edit form submission
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const index = parseInt(document.getElementById('editIndex').value);
+            const oldData = savedData[index];
+            
+            const processUpdate = (imageData, imageName) => {
+                const newData = {
+                    branchCode: document.getElementById('editBranchCode').value,
+                    branchName: 'สาขา' + document.getElementById('editBranchName').value,
+                    district: document.getElementById('editDistrict').value,
+                    ipAddress: document.getElementById('editIpAddress').value,
+                    imageData: imageData,
+                    imageName: imageName,
+                    timestamp: oldData.timestamp // Keep original timestamp
+                };
+                
+                // Validate branch code format
+                const branchCodePattern = /^[A-Za-zก-ฮ0-9]{2}$/;
+                if (!branchCodePattern.test(newData.branchCode)) {
+                    alert('กรุณากรอกรหัสสาขา 2 ตัวอักษร (A-Z, ก-ฮ, 0-9)');
+                    return;
+                }
+                
+                // Validate IP format
+                const ipPattern = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+                if (!ipPattern.test(newData.ipAddress)) {
+                    alert('กรุณากรอก IP Address ในรูปแบบที่ถูกต้อง (เช่น 192.168.1.100)');
+                    return;
+                }
+                
+                // Check for duplicate branch code (excluding current item)
+                if (savedData.some((item, i) => i !== index && item.branchCode === newData.branchCode)) {
+                    alert('รหัสสาขานี้มีอยู่ในระบบแล้ว กรุณาใช้รหัสสาขาอื่น');
+                    return;
+                }
+                
+                // Create change details
+                let changes = [];
+                if (oldData.branchCode !== newData.branchCode) changes.push(`รหัสสาขา: ${oldData.branchCode} → ${newData.branchCode}`);
+                if (oldData.branchName !== newData.branchName) changes.push(`ชื่อสาขา: ${oldData.branchName} → ${newData.branchName}`);
+                if (oldData.district !== newData.district) changes.push(`เขต: ${oldData.district} → ${newData.district}`);
+                if (oldData.ipAddress !== newData.ipAddress) changes.push(`IP: ${oldData.ipAddress} → ${newData.ipAddress}`);
+                if (editFileInput.files[0]) changes.push('เปลี่ยนรูป IP');
+                
+                // Update data
+                savedData[index] = newData;
+                localStorage.setItem('branchData', JSON.stringify(savedData));
+                
+                // Add log entry
+                addLog('แก้ไข', newData.branchCode, newData.branchName, changes.join(', '));
+                
+                // Reset and refresh
+                document.getElementById('editModal').classList.add('hidden');
+                editFileInput.value = '';
+                editUploadContent.classList.remove('hidden');
+                editImagePreview.classList.add('hidden');
+                displayData();
+                displayLogData();
+                updateDashboard();
+                
+                alert('✅ แก้ไขข้อมูลเรียบร้อยแล้ว!');
+            };
+            
+            // Handle image update
+            if (editFileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    processUpdate(e.target.result, editFileInput.files[0].name);
+                };
+                reader.readAsDataURL(editFileInput.files[0]);
+            } else {
+                // Keep existing image
+                processUpdate(oldData.imageData, oldData.imageName);
+            }
+        });
+
+        // Delete data function
+        function deleteData(index) {
+            const item = savedData[index];
+            
+            // Request password for deletion
+            const password = prompt(`🔐 กรุณาใส่รหัสผ่านเพื่อลบข้อมูลสาขา "${item.branchName}" (${item.branchCode}):`);
+            
+            // Check password
+            if (password !== '348900Ty') {
+                if (password !== null) { // User didn't cancel
+                    alert('❌ รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบข้อมูลได้');
+                }
+                return;
+            }
+            
+            // Confirm deletion
+            const confirmDelete = confirm(`⚠️ คุณแน่ใจหรือไม่ที่จะลบข้อมูลสาขา "${item.branchName}" (${item.branchCode})?\n\nการลบนี้ไม่สามารถยกเลิกได้!`);
+            
+            if (!confirmDelete) {
+                return;
+            }
+            
+            // Add log entry before deletion
+            addLog('ลบ', item.branchCode, item.branchName, `ลบข้อมูลสาขา IP: ${item.ipAddress}, เขต: ${item.district}`);
+            
+            // Remove data
+            savedData.splice(index, 1);
+            localStorage.setItem('branchData', JSON.stringify(savedData));
+            
+            // Refresh display
+            displayData();
+            displayLogData();
+            updateDashboard();
+            
+            // Show success message
+            alert('✅ ลบข้อมูลเรียบร้อยแล้ว!');
+        }
+
+        // Download Log Excel function
+        document.getElementById('downloadLogBtn').addEventListener('click', function() {
+            if (logData.length === 0) {
+                alert('ไม่มี Log ให้ดาวน์โหลด');
+                return;
+            }
+            
+            // Request password for download
+            const password = prompt('🔐 กรุณาใส่รหัสผ่านเพื่อดาวน์โหลดไฟล์ Log Excel:');
+            
+            // Check password
+            if (password !== '348900Ty') {
+                if (password !== null) { // User didn't cancel
+                    alert('❌ รหัสผ่านไม่ถูกต้อง! ไม่สามารถดาวน์โหลดได้');
+                }
+                return;
+            }
+            
+            // Prepare data for Excel
+            const excelLogData = logData.map(log => ({
+                'วันที่/เวลา': log.timestamp,
+                'ผู้ใช้': log.user,
+                'การกระทำ': log.action,
+                'รหัสสาขา': log.branchCode,
+                'รายละเอียด': log.details
+            }));
+            
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelLogData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { width: 20 }, // วันที่/เวลา
+                { width: 20 }, // ผู้ใช้
+                { width: 10 }, // การกระทำ
+                { width: 15 }, // รหัสสาขา
+                { width: 50 }  // รายละเอียด
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws, 'Log การแก้ไข');
+            
+            // Generate filename with current date
+            const now = new Date();
+            const filename = `Log_การแก้ไข_${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.xlsx`;
+            
+            // Download file
+            XLSX.writeFile(wb, filename);
+            
+            // Show success message
+            alert('✅ ดาวน์โหลดไฟล์ Log เรียบร้อยแล้ว!');
+        });
+
+        // Initialize display
+        displayData();
+        displayLogData();
+        updateDashboard();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9839fb26d21cd03b',t:'MTc1ODYyOTg2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
