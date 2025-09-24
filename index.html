@@ -21,7 +21,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-center py-4 sm:py-0 sm:h-16">
                 <div class="flex items-center mb-4 sm:mb-0">
                     <i class="fas fa-network-wired text-blue-600 text-2xl mr-3"></i>
-                    <h1 class="text-lg sm:text-xl font-bold text-gray-800">ระบบบันทึกข้อมูล IP เครื่องสาขา</h1>
+                    <h1 class="text-lg sm:text-xl font-bold text-gray-800">ระบบบันทึกข้อมูล IP (มี2 เครื่องใส่เครื่องเดียวพอ) </h1>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-2 sm:space-x-4">
                     <button id="nav-form" onclick="showPage('form')" class="nav-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-xl text-sm"><i class="fas fa-edit mr-2"></i>จัดการข้อมูล</button>
@@ -37,7 +37,7 @@
     <div id="formPage" class="page-content">
         <div class="max-w-4xl mx-auto p-6">
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6"><h2 class="text-2xl font-bold flex items-center"><i class="fas fa-server mr-3"></i><span id="form-title">เพิ่ม/แก้ไขข้อมูล IP (มี2 เครื่องใส่เครื่องเดียวพอ)</span></h2></div>
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6"><h2 class="text-2xl font-bold flex items-center"><i class="fas fa-server mr-3"></i><span id="form-title">เพิ่ม/แก้ไขข้อมูล IP</span></h2></div>
                 <div class="p-6 bg-gray-50 border-b"><div class="flex justify-center items-center h-48"><img id="imageSample" src="https://lh3.googleusercontent.com/d/1MdYAe4NB6mzN9k8SWYVf5tHA6caP0603" alt="ตัวอย่าง IP Config" class="rounded-lg shadow-md"><img id="imagePreview" src="" alt="รูปที่อัปโหลด" class="hidden rounded-lg shadow-md"></div></div>
                 <form id="ipForm" class="p-6 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -310,5 +310,6 @@
     </script>
 </body>
 </html>
+
 
 
