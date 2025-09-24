@@ -24,7 +24,7 @@
                     <h1 class="text-lg sm:text-xl font-bold text-gray-800">ระบบบันทึกข้อมูล IP เครื่องสาขา</h1>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-2 sm:space-x-4">
-                    <button id="nav-form" onclick="showPage('form')" class="nav-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-xl text-sm"><i class="fas fa-edit mr-2"></i>จัดการข้อมูล</button>
+                    <button id="nav-form" onclick="clearForm(); showPage('form');" class="nav-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-xl text-sm"><i class="fas fa-edit mr-2"></i>จัดการข้อมูล</button>
                     <button id="nav-list" onclick="showPage('list')" class="nav-btn bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded-xl text-sm"><i class="fas fa-list mr-2"></i>รายการ</button>
                     <button id="nav-dashboard" onclick="showPage('dashboard')" class="nav-btn bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-xl text-sm"><i class="fas fa-chart-bar mr-2"></i>Dashboard</button>
                     <button id="nav-log" onclick="showPage('log')" class="nav-btn bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-xl text-sm"><i class="fas fa-history mr-2"></i>Log</button>
@@ -47,7 +47,6 @@
                         <div><label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-globe text-purple-500 mr-2"></i>IP Address *</label><input type="text" id="ipAddress" class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="เช่น 192.168.1.100" required></div>
                     </div>
                     <div>
-                        <!-- *** แก้ไข: ปรับปรุง Label *** -->
                         <label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-camera text-orange-500 mr-2"></i>อัปโหลดรูป IP เครื่อง *</label>
                         <div class="flex items-center gap-2">
                            <div class="flex-grow border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-blue-400 cursor-pointer" onclick="document.getElementById('imageUpload').click()">
@@ -76,8 +75,18 @@
     <!-- Log Page -->
     <div id="logPage" class="page-content hidden"><div class="max-w-7xl mx-auto p-6"><div class="bg-white rounded-2xl shadow-xl overflow-hidden"><div class="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6"><h2 class="text-2xl font-bold flex items-center"><i class="fas fa-history mr-3"></i>ประวัติการใช้งานระบบ (Log)</h2></div><div class="p-6 overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">วันเวลา</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ผู้ใช้งาน</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">การดำเนินการ</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">รายละเอียด</th></tr></thead><tbody id="logTableBody" class="bg-white divide-y divide-gray-200"></tbody></table></div></div></div></div>
 
+    <!-- *** เพิ่มเข้ามา: โครงสร้าง HTML สำหรับ Image Modal *** -->
+    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4 cursor-pointer" onclick="closeImageModal()">
+        <span class="absolute top-4 right-6 text-white text-5xl font-bold cursor-pointer">&times;</span>
+        <div class="text-center" onclick="event.stopPropagation()"> <!-- ป้องกันการปิด modal เมื่อคลิกที่รูป -->
+            <img id="modalImage" class="max-h-[85vh] max-w-[90vw] shadow-lg rounded-lg">
+            <div id="modalCaption" class="mt-4 text-white text-lg"></div>
+        </div>
+    </div>
+
+
     <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0YufM-6D2QLauIDyvpnLJeJrVI4tDjMaIjYtQ7lL9q59WyJlC7rqRzHcudU0pUlHM/exec'; 
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrL1dzzSW_B2NoyViEMKTpbSojycJ3_-0RIWNw825G5z3zUlLPLQhhBrML4bfLlgoo6A/exec'; 
 
         let currentEditId = null, allBranchData = [], filteredBranchData = [];
         let barChart, pieChart;
@@ -133,8 +142,8 @@
             document.getElementById(`${pageName}Page`).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`nav-${pageName}`).classList.add('active');
-            if (pageName === 'form') clearForm();
-            else if (pageName === 'list') loadAllBranchData();
+            
+            if (pageName === 'list') loadAllBranchData();
             else if (pageName === 'dashboard') loadDashboardData();
             else if (pageName === 'log') loadLogData();
         }
@@ -161,14 +170,11 @@
                 district: document.getElementById('district').value, ipAddress: document.getElementById('ipAddress').value,
                 id: currentEditId, existingImageUrl: document.getElementById('existingImageUrl').value };
 
-            // *** เพิ่มการตรวจสอบ ***
-            // 1. ตรวจสอบฟิลด์ข้อมูลปกติ
             if (!formData.branchCode || !formData.branchName || !formData.district || !formData.ipAddress) {
                 Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลให้ครบทุกช่องที่มีเครื่องหมาย *', 'error'); 
                 return;
             }
 
-            // 2. ตรวจสอบการอัปโหลดไฟล์ (เฉพาะตอนสร้างใหม่)
             if (!currentEditId && !file) {
                 Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณาอัปโหลดรูปภาพ IP เครื่อง', 'error');
                 return;
@@ -214,6 +220,7 @@
             });
         }
 
+        // *** แก้ไข: ปรับปรุงการแสดงผลรูปภาพในตาราง ***
         function updateBranchList() {
             const tbody = document.getElementById('branchListBody');
             tbody.innerHTML = '';
@@ -223,9 +230,12 @@
             document.getElementById('emptyState').classList.add('hidden');
             filteredBranchData.forEach(branch => {
                 const imageUrl = branch.imageUrl || 'https://via.placeholder.com/40x40.png?text=No+Img';
+                const caption = `${branch.branchCode} - ${branch.branchName}`;
                 const row = `
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-2 text-center"><a href="${branch.imageUrl}" target="_blank" rel="noopener noreferrer"><img src="${imageUrl}" class="w-10 h-10 object-cover rounded-md inline-block"></a></td>
+                        <td class="px-6 py-2 text-center">
+                            <img src="${imageUrl}" class="w-10 h-10 object-cover rounded-md inline-block cursor-pointer hover:opacity-75" onclick="showImageModal('${branch.imageUrl}', '${caption}')">
+                        </td>
                         <td class="px-6 py-2"><span class="font-medium">${branch.branchCode}</span></td>
                         <td class="px-6 py-2">${branch.branchName}</td>
                         <td class="px-6 py-2 font-mono">${branch.ipAddress}</td>
@@ -311,7 +321,23 @@
             updateBranchList();
         }
         function refreshList() { document.getElementById('searchInput').value = ''; loadAllBranchData(); }
-        document.addEventListener('DOMContentLoaded', () => showPage('form'));
+        
+        // *** เพิ่มเข้ามา: ฟังก์ชันสำหรับแสดงและปิด Image Modal ***
+        function showImageModal(imageUrl, caption) {
+            if (!imageUrl || imageUrl.includes('placeholder.com')) {
+                // ไม่ต้องแสดง modal ถ้าเป็นรูป placeholder
+                return;
+            }
+            document.getElementById('modalImage').src = imageUrl;
+            document.getElementById('modalCaption').innerText = caption;
+            document.getElementById('imageModal').classList.remove('hidden');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { clearForm(); showPage('form'); });
     </script>
 </body>
 </html>
