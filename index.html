@@ -21,7 +21,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-center py-4 sm:py-0 sm:h-16">
                 <div class="flex items-center mb-4 sm:mb-0">
                     <i class="fas fa-network-wired text-blue-600 text-2xl mr-3"></i>
-                    <h1 class="text-lg sm:text-xl font-bold text-gray-800">ระบบบันทึกข้อมูล IP (มี2 เครื่องใส่เครื่องเดียวพอ) </h1>
+                    <h1 class="text-lg sm:text-xl font-bold text-gray-800">ระบบบันทึกข้อมูล IP เครื่องสาขา</h1>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-2 sm:space-x-4">
                     <button id="nav-form" onclick="showPage('form')" class="nav-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-xl text-sm"><i class="fas fa-edit mr-2"></i>จัดการข้อมูล</button>
@@ -41,18 +41,14 @@
                 <div class="p-6 bg-gray-50 border-b"><div class="flex justify-center items-center h-48"><img id="imageSample" src="https://lh3.googleusercontent.com/d/1MdYAe4NB6mzN9k8SWYVf5tHA6caP0603" alt="ตัวอย่าง IP Config" class="rounded-lg shadow-md"><img id="imagePreview" src="" alt="รูปที่อัปโหลด" class="hidden rounded-lg shadow-md"></div></div>
                 <form id="ipForm" class="p-6 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- *** แก้ไข: maxlength="2" และเพิ่ม placeholder *** -->
                         <div><label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-code text-blue-500 mr-2"></i>รหัสสาขา *</label><input type="text" id="branchCode" maxlength="2" class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="เช่น A1, B2" required></div>
-                        <!-- *** แก้ไข: เพิ่ม placeholder *** -->
                         <div><label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-building text-green-500 mr-2"></i>ชื่อสาขา *</label><input type="text" id="branchName" class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="เช่น สาขารามคำแหง" required></div>
-                        
                         <div><label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-map-marker-alt text-red-500 mr-2"></i>เขต *</label><select id="district" class="w-full px-4 py-3 border border-gray-300 rounded-xl" required><option value="">เลือกเขต</option><option value="K012">K012</option><option value="K122">K122</option><option value="K189">K189</option><option value="K195">K195</option><option value="K196">K196</option><option value="K247">K247</option><option value="K273">K273</option><option value="K358">K358</option></select></div>
-                        
-                        <!-- *** แก้ไข: เพิ่ม placeholder *** -->
                         <div><label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-globe text-purple-500 mr-2"></i>IP Address *</label><input type="text" id="ipAddress" class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="เช่น 192.168.1.100" required></div>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-camera text-orange-500 mr-2"></i>อัปโหลดรูป IP เครื่อง (ถ้ามี)</label>
+                        <!-- *** แก้ไข: ปรับปรุง Label *** -->
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-camera text-orange-500 mr-2"></i>อัปโหลดรูป IP เครื่อง *</label>
                         <div class="flex items-center gap-2">
                            <div class="flex-grow border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-blue-400 cursor-pointer" onclick="document.getElementById('imageUpload').click()">
                                 <input type="file" id="imageUpload" accept="image/*" class="hidden">
@@ -86,10 +82,8 @@
         let currentEditId = null, allBranchData = [], filteredBranchData = [];
         let barChart, pieChart;
 
-        // *** เพิ่ม Event Listener สำหรับ "ชื่อสาขา" ***
         document.getElementById('branchName').addEventListener('blur', (e) => {
             const value = e.target.value.trim();
-            // ถ้ามีข้อความ แต่ไม่ได้ขึ้นต้นด้วย "สาขา" ให้เติมให้
             if (value && !value.startsWith('สาขา')) {
                 e.target.value = 'สาขา' + value;
             }
@@ -166,9 +160,20 @@
                 action: 'save', branchCode: document.getElementById('branchCode').value, branchName: document.getElementById('branchName').value,
                 district: document.getElementById('district').value, ipAddress: document.getElementById('ipAddress').value,
                 id: currentEditId, existingImageUrl: document.getElementById('existingImageUrl').value };
+
+            // *** เพิ่มการตรวจสอบ ***
+            // 1. ตรวจสอบฟิลด์ข้อมูลปกติ
             if (!formData.branchCode || !formData.branchName || !formData.district || !formData.ipAddress) {
-                Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลให้ครบทุกช่อง', 'error'); return;
+                Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลให้ครบทุกช่องที่มีเครื่องหมาย *', 'error'); 
+                return;
             }
+
+            // 2. ตรวจสอบการอัปโหลดไฟล์ (เฉพาะตอนสร้างใหม่)
+            if (!currentEditId && !file) {
+                Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณาอัปโหลดรูปภาพ IP เครื่อง', 'error');
+                return;
+            }
+
             Swal.fire({ title: 'กำลังบันทึก...', text: 'กรุณารอสักครู่', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             if (file) {
                 const reader = new FileReader();
@@ -310,6 +315,3 @@
     </script>
 </body>
 </html>
-
-
-
